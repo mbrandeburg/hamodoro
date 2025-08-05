@@ -3,6 +3,9 @@ FROM python:3.11-slim
 # Set working directory
 WORKDIR /app
 
+# Create directory for persistent data
+RUN mkdir -p /app/data
+
 # Install uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
@@ -23,6 +26,10 @@ EXPOSE 9055
 # Set environment variables
 ENV FLASK_APP=app.py
 ENV FLASK_ENV=production
+ENV DATABASE=/app/data/hamodoro.db
+
+# Create a volume for persistent data
+VOLUME ["/app/data"]
 
 # Run the application
 CMD ["python", "app.py"]

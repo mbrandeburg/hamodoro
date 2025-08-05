@@ -157,11 +157,11 @@ class HamodoroTimer {
             // Only change message if enough time has passed
             if (now - this.lastMessageChange > this.MESSAGE_CHANGE_DELAY) {
                 const happyMessages = [
-                    "Great job! Time for Swiss cheese treats! �",
+                    "Great job! Time for Swiss cheese treats! 💪",
                     "You did amazing! Let's play in the snow! ❄️",
-                    "Break time = cheese and belly rubs! �",
+                    "Break time = cheese and belly rubs! 💪",
                     "Woof! You deserve this alpine break! 🏔️",
-                    "Time to stretch those mountain dog legs! �"
+                    "Time to stretch those mountain dog legs! 🥾"
                 ];
                 this.hamMessage.textContent = happyMessages[Math.floor(Math.random() * happyMessages.length)];
                 this.lastMessageChange = now;
@@ -174,9 +174,9 @@ class HamodoroTimer {
             // Only change message if enough time has passed
             if (now - this.lastMessageChange > this.MESSAGE_CHANGE_DELAY) {
                 const focusMessages = [
-                    "Let's focus together, mountain style! �️",
+                    "Let's focus together, mountain style! 🏔️",
                     "I'm watching you work with my gentle eyes! 👀",
-                    "Stay strong, Swiss cheese treats await! �",
+                    "Stay strong, Swiss cheese treats await! 🏔️",
                     "Focus like I focus on alpine hiking trails! 🥾",
                     "You got this, my favorite human! 💪"
                 ];

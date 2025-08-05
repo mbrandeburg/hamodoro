@@ -150,9 +150,12 @@ Thumbs.db
 
 # Application specific
 *.db
+*.sqlite
+*.sqlite3
 logs/
 temp/
 create_placeholders.py
+data/
 
 # Docker
 .dockerignore

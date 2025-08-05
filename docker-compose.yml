@@ -7,5 +7,11 @@ services:
       - "9055:9055"
     environment:
       - FLASK_ENV=production
+      - DATABASE=/app/data/hamodoro.db
+    volumes:
+      - hamodoro_data:/app/data
     restart: unless-stopped
     container_name: hamodoro-timer
+
+volumes:
+  hamodoro_data:

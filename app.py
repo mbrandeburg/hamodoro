@@ -1,8 +1,33 @@
 from flask import Flask, render_template, jsonify, request
 from datetime import datetime, timedelta
 import json
+import sqlite3
+import os
 
 app = Flask(__name__)
+
+# Database setup
+DATABASE = os.environ.get('DATABASE', 'hamodoro.db')
+
+def init_db():
+    """Initialize the database with todos table"""
+    conn = sqlite3.connect(DATABASE)
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS todos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            text TEXT NOT NULL,
+            completed BOOLEAN NOT NULL DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+def get_db_connection():
+    """Get a database connection"""
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row
+    return conn
 
 # Global timer state
 timer_state = {
@@ -14,9 +39,8 @@ timer_state = {
     'current_duration': 25 * 60
 }
 
-# Global todo list
-todo_list = []
-todo_id_counter = 1
+# Initialize database on startup
+init_db()
 
 @app.route('/')
 def index():
@@ -80,47 +104,112 @@ def get_status():
 
 @app.route('/api/todos', methods=['GET'])
 def get_todos():
-    return jsonify(todo_list)
+    conn = get_db_connection()
+    todos = conn.execute(
+        'SELECT id, text, completed, created_at FROM todos ORDER BY created_at DESC'
+    ).fetchall()
+    conn.close()
+    
+    # Convert to list of dictionaries
+    todos_list = []
+    for todo in todos:
+        todos_list.append({
+            'id': todo['id'],
+            'text': todo['text'],
+            'completed': bool(todo['completed']),
+            'created_at': todo['created_at']
+        })
+    
+    return jsonify(todos_list)
 
 @app.route('/api/todos', methods=['POST'])
 def add_todo():
-    global todo_id_counter
     data = request.get_json()
     text = data.get('text', '').strip()
     
     if not text:
         return jsonify({'error': 'Todo text is required'}), 400
     
-    todo = {
-        'id': todo_id_counter,
-        'text': text,
-        'completed': False,
-        'created_at': datetime.now().isoformat()
-    }
+    conn = get_db_connection()
+    cursor = conn.execute(
+        'INSERT INTO todos (text, completed) VALUES (?, ?)',
+        (text, False)
+    )
+    todo_id = cursor.lastrowid
     
-    todo_list.append(todo)
-    todo_id_counter += 1
+    # Get the created todo
+    todo = conn.execute(
+        'SELECT id, text, completed, created_at FROM todos WHERE id = ?',
+        (todo_id,)
+    ).fetchone()
+    conn.commit()
+    conn.close()
     
-    return jsonify(todo), 201
+    return jsonify({
+        'id': todo['id'],
+        'text': todo['text'],
+        'completed': bool(todo['completed']),
+        'created_at': todo['created_at']
+    }), 201
 
 @app.route('/api/todos/<int:todo_id>', methods=['PUT'])
 def update_todo(todo_id):
     data = request.get_json()
     
-    for todo in todo_list:
-        if todo['id'] == todo_id:
-            if 'completed' in data:
-                todo['completed'] = bool(data['completed'])
-            if 'text' in data:
-                todo['text'] = data['text'].strip()
-            return jsonify(todo)
+    conn = get_db_connection()
     
-    return jsonify({'error': 'Todo not found'}), 404
+    # Check if todo exists
+    todo = conn.execute(
+        'SELECT id FROM todos WHERE id = ?', (todo_id,)
+    ).fetchone()
+    
+    if not todo:
+        conn.close()
+        return jsonify({'error': 'Todo not found'}), 404
+    
+    # Update the todo
+    if 'completed' in data:
+        conn.execute(
+            'UPDATE todos SET completed = ? WHERE id = ?',
+            (bool(data['completed']), todo_id)
+        )
+    if 'text' in data:
+        conn.execute(
+            'UPDATE todos SET text = ? WHERE id = ?',
+            (data['text'].strip(), todo_id)
+        )
+    
+    # Get the updated todo
+    updated_todo = conn.execute(
+        'SELECT id, text, completed, created_at FROM todos WHERE id = ?',
+        (todo_id,)
+    ).fetchone()
+    
+    conn.commit()
+    conn.close()
+    
+    return jsonify({
+        'id': updated_todo['id'],
+        'text': updated_todo['text'],
+        'completed': bool(updated_todo['completed']),
+        'created_at': updated_todo['created_at']
+    })
 
 @app.route('/api/todos/<int:todo_id>', methods=['DELETE'])
 def delete_todo(todo_id):
-    global todo_list
-    todo_list = [todo for todo in todo_list if todo['id'] != todo_id]
+    conn = get_db_connection()
+    
+    # Check if todo exists and delete it
+    result = conn.execute(
+        'DELETE FROM todos WHERE id = ?', (todo_id,)
+    )
+    
+    conn.commit()
+    conn.close()
+    
+    if result.rowcount == 0:
+        return jsonify({'error': 'Todo not found'}), 404
+    
     return '', 204
 
 if __name__ == '__main__':
