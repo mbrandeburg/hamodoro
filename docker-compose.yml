@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  hamodoro:
+    build: .
+    ports:
+      - "9055:9055"
+    environment:
+      - FLASK_ENV=production
+    restart: unless-stopped
+    container_name: hamodoro-timer

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐕 Hamodoro Timer 🐕</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏔️ HAMODORO TIMER 🏔️</h1>
+            <p class="subtitle">Stay focused like Ham the Bernese Mountain Dog stays focused on treats!</p>
+        </header>
+
+        <main>
+            <div class="main-container">
+                <div class="timer-section">
+                    <div class="timer-container">
+                        <div class="ham-image-container">
+                            <img id="ham-image" src="{{ url_for('static', filename='images/ham-focus.png') }}" alt="Ham" class="ham-image">
+                            <div class="speech-bubble" id="speech-bubble">
+                                <span id="ham-message">Let's focus together, mountain style! 🏔️</span>
+                            </div>
+                        </div>
+
+                        <div class="timer-display">
+                            <div class="timer-text" id="timer">25:00</div>
+                            <div class="timer-mode" id="mode">FOCUS TIME</div>
+                        </div>
+
+                        <div class="controls">
+                            <button id="start-btn" class="btn btn-start">🏃‍♂️ START</button>
+                            <button id="stop-btn" class="btn btn-stop">⏹️ STOP</button>
+                            <button id="reset-btn" class="btn btn-reset">🔄 RESET</button>
+                            <button id="break-btn" class="btn btn-break">☕ BREAK MODE</button>
+                        </div>
+
+                        <div class="stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Sessions Completed:</span>
+                                <span class="stat-value" id="sessions">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="todo-section">
+                    <div class="todo-container">
+                        <h3>🏔️ Ham's Task List 🏔️</h3>
+                        <div class="todo-input-container">
+                            <input type="text" id="todo-input" placeholder="Add a new task for Ham the Bernese to watch over..." maxlength="100">
+                            <button id="add-todo-btn" class="btn btn-add-todo">➕ ADD</button>
+                        </div>
+                        <div class="todo-list" id="todo-list">
+                            <!-- Todo items will be added here dynamically -->
+                        </div>
+                        <div class="todo-stats">
+                            <span class="todo-stat">
+                                <span id="completed-count">0</span> completed, 
+                                <span id="remaining-count">0</span> remaining
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>🏔️ Powered by Ham's endless Bernese Mountain Dog energy and love for treats �</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
